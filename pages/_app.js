@@ -1,3 +1,4 @@
+// pages/_app.js
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
@@ -72,6 +73,19 @@ function MyApp({ Component, pageProps }) {
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
   };
+
+  // Close search when route changes
+  useEffect(() => {
+    const handleRouteChange = () => {
+      setSearchOpen(false);
+    };
+
+    router.events.on('routeChangeStart', handleRouteChange);
+    
+    return () => {
+      router.events.off('routeChangeStart', handleRouteChange);
+    };
+  }, [router]);
 
   return (
     <div className={`min-h-screen ${darkMode ? 'dark bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'}`}>
@@ -148,6 +162,7 @@ function MyApp({ Component, pageProps }) {
             <button 
               onClick={toggleDarkMode}
               className="p-2 rounded-full hover:bg-gray-700 transition"
+              aria-label="Toggle dark mode"
             >
               {darkMode ? (
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -161,7 +176,7 @@ function MyApp({ Component, pageProps }) {
             </button>
 
             {/* Mobile Menu Button */}
-            <button className="md:hidden p-2 rounded-full hover:bg-gray-700 transition">
+            <button className="md:hidden p-2 rounded-full hover:bg-gray-700 transition" aria-label="Menu">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
               </svg>
@@ -178,6 +193,7 @@ function MyApp({ Component, pageProps }) {
                 <button 
                   onClick={() => setSearchOpen(false)}
                   className="p-2 rounded-full hover:bg-gray-700 transition"
+                  aria-label="Close search"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -194,11 +210,13 @@ function MyApp({ Component, pageProps }) {
                   onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                   placeholder="Search Anime, Donghua, or Comic..."
                   className="flex-grow px-4 py-2 bg-gray-700 text-white rounded-l-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  aria-label="Search"
                 />
                 <button
                   onClick={handleSearch}
                   disabled={loading}
                   className="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-r-lg transition disabled:opacity-50"
+                  aria-label="Submit search"
                 >
                   {loading ? 'Searching...' : 'Search'}
                 </button>
@@ -225,7 +243,7 @@ function MyApp({ Component, pageProps }) {
                   </div>
                 ) : (
                   <>
-                    {searchResults.anime && (
+                    {searchResults.anime && searchResults.anime.length > 0 && (
                       <div className="mb-6">
                         <h3 className="text-lg font-semibold mb-2">Anime Results</h3>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -255,7 +273,7 @@ function MyApp({ Component, pageProps }) {
                       </div>
                     )}
 
-                    {searchResults.donghua && (
+                    {searchResults.donghua && searchResults.donghua.length > 0 && (
                       <div className="mb-6">
                         <h3 className="text-lg font-semibold mb-2">Donghua Results</h3>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -285,7 +303,7 @@ function MyApp({ Component, pageProps }) {
                       </div>
                     )}
 
-                    {searchResults.comic && (
+                    {searchResults.comic && searchResults.comic.length > 0 && (
                       <div className="mb-6">
                         <h3 className="text-lg font-semibold mb-2">Comic Results</h3>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -334,6 +352,7 @@ function MyApp({ Component, pageProps }) {
           <button 
             onClick={() => router.push('/')}
             className={`flex flex-col items-center justify-center p-2 rounded-lg ${router.pathname === '/' ? 'text-indigo-400 bg-gray-700' : 'text-gray-400'}`}
+            aria-label="Home"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
               <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
@@ -343,6 +362,7 @@ function MyApp({ Component, pageProps }) {
           <button 
             onClick={() => router.push('/anime')}
             className={`flex flex-col items-center justify-center p-2 rounded-lg ${router.pathname.startsWith('/anime') ? 'text-indigo-400 bg-gray-700' : 'text-gray-400'}`}
+            aria-label="Anime"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
@@ -352,6 +372,7 @@ function MyApp({ Component, pageProps }) {
           <button 
             onClick={() => router.push('/donghua')}
             className={`flex flex-col items-center justify-center p-2 rounded-lg ${router.pathname.startsWith('/donghua') ? 'text-indigo-400 bg-gray-700' : 'text-gray-400'}`}
+            aria-label="Donghua"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
               <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v8a2 2 0 01-2 2h-2a2 2 0 01-2-2V6z" />
@@ -361,6 +382,7 @@ function MyApp({ Component, pageProps }) {
           <button 
             onClick={() => router.push('/comic')}
             className={`flex flex-col items-center justify-center p-2 rounded-lg ${router.pathname.startsWith('/comic') ? 'text-indigo-400 bg-gray-700' : 'text-gray-400'}`}
+            aria-label="Comic"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
               <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" />
@@ -370,6 +392,7 @@ function MyApp({ Component, pageProps }) {
           <button 
             onClick={() => router.push('/schedule')}
             className={`flex flex-col items-center justify-center p-2 rounded-lg ${router.pathname === '/schedule' ? 'text-indigo-400 bg-gray-700' : 'text-gray-400'}`}
+            aria-label="Schedule"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
@@ -379,6 +402,7 @@ function MyApp({ Component, pageProps }) {
           <button 
             onClick={() => router.push('/genres')}
             className={`flex flex-col items-center justify-center p-2 rounded-lg ${router.pathname === '/genres' ? 'text-indigo-400 bg-gray-700' : 'text-gray-400'}`}
+            aria-label="Genres"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
